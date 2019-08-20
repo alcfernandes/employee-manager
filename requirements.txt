@@ -1,0 +1,41 @@
+# Base installation
+Django==2.2.4
+
+# For use in Settings
+dj-database-url==0.5.0
+python-decouple==3.1
+
+# Django Rest Framework
+djangorestframework==3.10.2
+
+# Coreapi necessary for schema support do DRF.
+coreapi==2.3.3
+
+# A JSON Web Token authentication plugin for the Django REST Framework.
+djangorestframework-simplejwt==4.3.0
+
+# For filters on DRF
+django-filter==2.2.0
+
+# New Admin layout
+django-admin-interface==0.10.5
+
+# Collection of custom extensions for the Django. Management commands, additional database fields, admin extensions
+django-extensions==2.2.1
+
+# IPython (Python Console)
+ipython==7.7.0
+
+# To serve files on AWS S3
+django-storages==1.7.1  # provide a variety of storage backends in a single library.
+boto3==1.9.211          # Amazon Web Services (AWS) SDK for Python
+
+# Django app for handling the server headers required for Cross-Origin Resource Sharing (CORS)
+django-cors-headers==3.1.0
+
+# Necessary to Heroku
+gunicorn==19.9.0  # Python WSGI HTTP Server for UNIX
+psycopg2==2.8.3   # PostgreSQL adapter for the Python
+
+###################################
+
