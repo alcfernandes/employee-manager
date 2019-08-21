@@ -1,0 +1,3 @@
+Just to force the static folder to be included in the heroku repository.
+
+Heroku needs this folder to make collectstatic.
