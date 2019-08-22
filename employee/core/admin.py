@@ -1,3 +1,35 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Department, Employee
+
+
+@admin.register(Department)
+class DepartmentModelAdmin(admin.ModelAdmin):
+
+    list_display = [
+        "id",
+        "name",
+    ]
+
+    list_display_links = ["id", "name"]
+
+    search_fields = ["name", "id"]
+
+    readonly_fields = ['id']
+
+
+@admin.register(Employee)
+class EmployeeModelAdmin(admin.ModelAdmin):
+
+    list_display = [
+        "id",
+        "name",
+        "email",
+        "department",
+    ]
+
+    list_display_links = ["id", "name"]
+
+    search_fields = ["name", "id", "email"]
+
+    readonly_fields = ['id']
