@@ -1,3 +1,6 @@
+"""
+Integration Tests to Employees API
+"""
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -131,3 +134,83 @@ class APIEmployeesCreate(APITestCase):
             str(self.response.content, encoding='utf8'),
             self.expected
         )
+
+
+class APIEmployeeUpdatePatch(APITestCase):
+    """
+    (PATCH) /api/employees/<employee_id>
+    Should update the Employee with the given data (even partial data)
+    """
+
+    fixtures = ['user.json']
+
+    def setUp(self):
+        create_test_data(self)
+
+    def test_can_update(self):
+        expected = {
+            "id": self.arnaldo.id,
+            "name": "Name Changed",
+            "email": self.arnaldo.email,
+            "department": self.architecture.id
+        }
+
+        payload = {
+            'name': 'Name Changed'
+        }
+
+        self.response = self.client.patch(f'/api/employees/{self.arnaldo.id}/', payload, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.assertEqual(self.response.status_code, status.HTTP_200_OK)
+        self.assertJSONEqual(
+            str(self.response.content, encoding='utf8'),
+            expected
+        )
+
+
+class APIEmployeeUpdatePut(APITestCase):
+    """
+    (PUT) /api/employees/<employee_id>
+    Should update the Employee with the given data (all data)
+    """
+
+    fixtures = ['user.json']
+
+    def setUp(self):
+        create_test_data(self)
+
+    def test_can_update(self):
+        expected = {
+            "id": self.arnaldo.id,
+            "name": "Name Changed",
+            "email": "new@test.com",
+            "department": self.architecture.id
+        }
+
+        payload = {
+            'name': 'Name Changed',
+            'email': 'new@test.com',
+            'department': self.architecture.id
+        }
+
+        self.response = self.client.put(f'/api/employees/{self.arnaldo.id}/', payload, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.assertEqual(self.response.status_code, status.HTTP_200_OK)
+        self.assertJSONEqual(
+            str(self.response.content, encoding='utf8'),
+            expected
+        )
+
+
+class APIEmployeeDestroy(APITestCase):
+    """
+    (DEL) /api/employees/<employee_id>
+    Should delete the Employee with the given id
+    """
+    fixtures = ['user.json']
+
+    def setUp(self):
+        create_test_data(self)
+
+    def test_can_delete(self):
+        self.response = self.client.delete('/api/employees/1/', HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.assertEqual(self.response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Employee.objects.count(), 2)
