@@ -1,6 +1,7 @@
 from django_filters import rest_framework as filters
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from employee.api_version import API_Version
@@ -15,7 +16,7 @@ class ApiVersion(viewsets.ViewSet):
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
-    # TODO permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = Employee.objects.all()
 
     serializer_class = EmployeeSerializer
