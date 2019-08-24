@@ -9,4 +9,8 @@ class APIUrlTest(APITestCase):
         print(response.status_code)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
+    def test_department_url_without_authentication(self):
+        response = self.client.get('/api/departments/')
+        print(response.status_code)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
