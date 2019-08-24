@@ -3,11 +3,12 @@ A demonstration of using Python and Django to build a Rest API.
 
 This application implements a HTTP REST API for list, retrieve, create, update and delete employess and departments.
 
-## Heroku
+### Heroku
 This application can be found running on Heroku: [Api Root](https://llab-employee-dev.herokuapp.com/api/). [Api Admin](https://llab-employee-dev.herokuapp.com/admin/). (*login: admin, password: adminadmin*)
 
-## API Documentation
+### API Documentation
 An API documentation can be found [here](https://documenter.getpostman.com/view/3590276/SVfMSq5c).
+
 
 # The problem
 Our team is growing every month and now we need to have some application to manage employees' information, such as name, e-mail and department. The application must have an API to allow integrations.
