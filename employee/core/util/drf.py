@@ -8,6 +8,7 @@ Correcting this is as simple as overriding the exception handler, by converting 
 """
 
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db.models import ProtectedError
 
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.views import exception_handler as drf_exception_handler
@@ -29,6 +30,12 @@ def exception_handler(exc, context):
     """
 
     if isinstance(exc, DjangoValidationError):
-        exc = DRFValidationError(detail=exc.message_dict)
+        try:
+            exc = DRFValidationError(detail=exc.message_dict)
+        except AttributeError:
+            exc = DRFValidationError(detail={"validation_error": exc.message})
+
+    if isinstance(exc, ProtectedError):
+        exc = DRFValidationError(detail={"protection_error": exc.args[0]})
 
     return drf_exception_handler(exc, context)
