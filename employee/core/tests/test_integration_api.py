@@ -6,14 +6,14 @@ from ..util.api_test_helpers import get_token
 
 
 def create_test_data(self):
-    architecture = Department.objects.create(name="Architecture")
+    self.architecture = Department.objects.create(name="Architecture")
     ecommerce = Department.objects.create(name="E-commerce")
     mobile = Department.objects.create(name="Mobile")
 
     self.arnaldo = Employee.objects.create(
         name="Arnaldo Pereira",
         email="arnaldo@teste.com",
-        department=architecture
+        department=self.architecture
     )
 
     self.renato = Employee.objects.create(
@@ -32,6 +32,11 @@ def create_test_data(self):
 
 
 class APIEmployeeListTest(APITestCase):
+    """
+    (GET) /api/employees/
+    Should return the existing Employees list (without ids)
+    """
+
     fixtures = ['user.json']
 
     def setUp(self):
@@ -65,4 +70,64 @@ class APIEmployeeListTest(APITestCase):
         self.assertJSONEqual(
             str(self.response.content, encoding='utf8'),
             expected
+        )
+
+
+class APIEmployeeRetrieve(APITestCase):
+    """
+    (GET) /api/employees/<employee_id>
+    Should return the Employee with the given id
+    """
+
+    fixtures = ['user.json']
+
+    def setUp(self):
+        create_test_data(self)
+
+    def test_can_retrieve_an_employee(self):
+        self.maxDiff = None
+        expected = {
+            "id": self.arnaldo.id,
+            "name": self.arnaldo.name,
+            "email": self.arnaldo.email,
+            "department": self.architecture.id
+        }
+        self.response = self.client.get(f'/api/employees/{self.arnaldo.id}/',
+                                        HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.assertEqual(self.response.status_code, status.HTTP_200_OK)
+        self.assertJSONEqual(
+            str(self.response.content, encoding='utf8'),
+            expected
+        )
+
+
+class APIEmployeesCreate(APITestCase):
+    """
+    (POST) /api/employee/
+    It should create a new employee with the given data
+    """
+
+    fixtures = ['user.json']
+
+    def setUp(self):
+        self.token = get_token(self.client)
+        self.mobile = Department.objects.create(name="Mobile")
+
+    def test_create(self):
+        data_new_employee = {
+            'name': "Alessandro Fernandes",
+            'email': "alcfernandes@yahoo.com",
+            'department': 1
+        }
+
+        self.response = self.client.post('/api/employees/', data_new_employee, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
+
+        self.expected = {
+            'id': Employee.objects.first().id,
+            **data_new_employee
+        }
+        self.assertJSONEqual(
+            str(self.response.content, encoding='utf8'),
+            self.expected
         )

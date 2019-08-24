@@ -7,18 +7,28 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Department
-        fields = ('name',)
+        fields = ('id', 'name')
 
 
-class EmployeeSerializer(serializers.ModelSerializer):
+class EmployeeListSerializer(serializers.ModelSerializer):
     department = serializers.SerializerMethodField()
 
     class Meta:
         model = Employee
-        exclude = ('id',)
+        fields = ('name', 'email', 'department')
 
 
     def get_department(self, obj):
         return obj.department.name
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
+
+    class Meta:
+        model = Employee
+        fields = ('id', 'name', 'email', 'department')
+
+
 
 

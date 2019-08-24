@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from employee.api_version import API_Version
-from .serializers import EmployeeSerializer
+from .serializers import EmployeeListSerializer, EmployeeSerializer
 from ..models import Employee
 
 
@@ -19,10 +19,13 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Employee.objects.all()
 
-    serializer_class = EmployeeSerializer
-
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
     filter_fields = ('department',)
     ordering_fields = ('name',)
     search_fields = ('name', 'email')
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return EmployeeListSerializer
+
+        return EmployeeSerializer

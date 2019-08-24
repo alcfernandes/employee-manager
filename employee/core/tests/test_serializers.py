@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase
 
-from ..api.serializers import EmployeeSerializer, DepartmentSerializer
+from ..api.serializers import EmployeeListSerializer, DepartmentSerializer
 from ..models import Employee, Department
 
 
@@ -13,7 +13,7 @@ class APIEmployeesSerializersTest(APITestCase):
             department=Department.objects.create(name="Architecture")
         )
 
-        employee_serializer = EmployeeSerializer(arnaldo)
+        employee_serializer = EmployeeListSerializer(arnaldo)
 
         self.assertIsNotNone(employee_serializer.data)
         self.assertEqual("Arnaldo Pereira", employee_serializer.data['name'])
@@ -25,4 +25,5 @@ class APIEmployeesSerializersTest(APITestCase):
         department_serializer = DepartmentSerializer(architecture)
 
         self.assertIsNotNone(department_serializer.data)
-        self.assertEqual("Architecture", department_serializer.data['name'])
+        self.assertEqual(architecture.name, department_serializer.data['name'])
+        self.assertEqual(architecture.id, department_serializer.data['id'])
