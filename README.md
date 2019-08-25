@@ -1,10 +1,15 @@
-# employee-manager
-A demonstration of using Python and Django to build a Rest API.
+# Employee Manager API
+A demonstration of using Python and Django to create a Rest API.
 
-This application implements a HTTP REST API for list, retrieve, create, update and delete employess and departments.
+This app implements a hypothetical scenario of an HTTP REST API that lets you list, retrieve, create, update, and delete employees and departments from an employee management system.
 
-### Heroku
-This application can be found running on Heroku: [Api Root](https://llab-employee-dev.herokuapp.com/api/). [Api Admin](https://llab-employee-dev.herokuapp.com/admin/). (*login: admin, password: adminadmin*)
+An administration panel is also available for data maintenance.
+### Deploy
+The application was deployed in Heroko and can be accessed through these links: [Api Root](https://llab-employee-dev.herokuapp.com/api/). [Api Admin](https://llab-employee-dev.herokuapp.com/admin/). (*login: admin, password: adminadmin*)
+
+To serve the static files the AWS S3 service is being used.
+
+The database used is Postgres.
 
 ### API Documentation
 An API documentation can be found [here](https://documenter.getpostman.com/view/3590276/SVfMSq5c).
