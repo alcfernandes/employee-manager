@@ -20,12 +20,13 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
 
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
-    filter_fields = ('department',)
+    filter_fields = ('department', 'email')
     ordering_fields = ('name',)
-    search_fields = ('name', 'email')
+    search_fields = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'list':
+        email_filter = self.request.query_params.get('email', None)
+        if self.action == 'list' and not email_filter:
             return EmployeeListSerializer
 
         return EmployeeSerializer

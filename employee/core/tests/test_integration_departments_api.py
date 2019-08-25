@@ -8,14 +8,22 @@ from ..models import Department
 from ..util.api_test_helpers import get_token
 
 
-def create_test_data(self):
-    self.mobile = Department.objects.create(name="Mobile")
-    self.ecommerce = Department.objects.create(name="E-commerce")
+class HasDepartmentTestData:
+    def __init__(self):
+        self.mobile = None
+        self.ecommerce = None
+        self.departments = []
 
-    self.token = get_token(self.client)
+    def create_test_data(self):
+        self.mobile = Department.objects.create(name="Mobile")
+        self.ecommerce = Department.objects.create(name="E-commerce")
+        self.departments = [self.mobile, self.ecommerce]
+
+    class Meta:
+        abstract = True
 
 
-class APIDepartmentsListTest(APITestCase):
+class APIDepartmentsListTest(APITestCase, HasDepartmentTestData):
     """
     (GET) /api/departments/
     Should return the existing Departments list
@@ -24,8 +32,9 @@ class APIDepartmentsListTest(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
+        self.token = get_token(self.client)
         self.response = self.client.get('/api/departments/', HTTP_AUTHORIZATION=f'Bearer {self.token}')
 
     def test_get(self):
@@ -33,16 +42,14 @@ class APIDepartmentsListTest(APITestCase):
 
     def test_response(self):
         self.maxDiff = None
-        expected = [
-            {
-                "id": self.mobile.id,
-                "name": self.mobile.name
-            },
-            {
-                "id": self.ecommerce.id,
-                "name": self.ecommerce.name
-            }
-        ]
+        expected = []
+        for department in self.departments:
+            expected.append(
+                {
+                    "id": department.id,
+                    "name": department.name
+                }
+            )
 
         self.assertJSONEqual(
             str(self.response.content, encoding='utf8'),
@@ -50,7 +57,7 @@ class APIDepartmentsListTest(APITestCase):
         )
 
 
-class APIEmployeeRetrieve(APITestCase):
+class APIEmployeeRetrieve(APITestCase, HasDepartmentTestData):
     """
     (GET) /api/departments/<employee_id>
     Should return the Department with the given id
@@ -59,14 +66,16 @@ class APIEmployeeRetrieve(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
-    def test_can_retrieve_an_employee(self):
+    def test_can_retrieve_an_department(self):
         self.maxDiff = None
         expected = {
             "id": self.mobile.id,
             "name": self.mobile.name
         }
+
+        self.token = get_token(self.client)
         self.response = self.client.get(f'/api/departments/{self.mobile.id}/',
                                         HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
@@ -105,7 +114,7 @@ class APIDepartmentCreate(APITestCase):
         )
 
 
-class APIDepartmentUpdatePatch(APITestCase):
+class APIDepartmentUpdatePatch(APITestCase, HasDepartmentTestData):
     """
     (PATCH) /api/departments/<employee_id>
     Should update the Department with the given data (even partial data)
@@ -114,7 +123,7 @@ class APIDepartmentUpdatePatch(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
     def test_can_update(self):
         expected = {
@@ -126,6 +135,7 @@ class APIDepartmentUpdatePatch(APITestCase):
             'name': 'Name Changed'
         }
 
+        self.token = get_token(self.client)
         self.response = self.client.patch(f'/api/departments/{self.mobile.id}/', payload, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
         self.assertJSONEqual(
@@ -134,7 +144,7 @@ class APIDepartmentUpdatePatch(APITestCase):
         )
 
 
-class APIDepartmentDestroy(APITestCase):
+class APIDepartmentDestroy(APITestCase, HasDepartmentTestData):
     """
     (DEL) /api/departments/<employee_id>
     Should delete the Department with the given id
@@ -142,9 +152,10 @@ class APIDepartmentDestroy(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
     def test_can_delete(self):
+        self.token = get_token(self.client)
         self.response = self.client.delete('/api/departments/1/', HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Department.objects.count(), 1)
