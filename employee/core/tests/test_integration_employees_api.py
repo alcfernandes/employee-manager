@@ -214,3 +214,37 @@ class APIEmployeeDestroy(APITestCase):
         self.response = self.client.delete('/api/employees/1/', HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Employee.objects.count(), 2)
+
+
+class APIEmployeeEmailFilterTest(APITestCase):
+    """
+    (GET) /api/employees/?email=<email>
+    Should return the Employee that has the given email.
+    """
+
+    fixtures = ['user.json']
+
+    def setUp(self):
+        create_test_data(self)
+
+        self.response = self.client.get(f'/api/employees/?email={self.renato.email}', HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+    def test_get(self):
+        self.assertEqual(self.response.status_code, status.HTTP_200_OK)
+
+    def test_response(self):
+        self.maxDiff = None
+        expected = [
+            {
+                "name": self.renato.name,
+                "email": self.renato.email,
+                "department": self.renato.department.id,
+                "id": self.renato.id
+            }
+        ]
+
+        self.assertJSONEqual(
+            str(self.response.content, encoding='utf8'),
+            expected
+        )
+
