@@ -8,33 +8,46 @@ from ..models import Department, Employee
 from ..util.api_test_helpers import get_token
 
 
-def create_test_data(self):
-    self.architecture = Department.objects.create(name="Architecture")
-    ecommerce = Department.objects.create(name="E-commerce")
-    mobile = Department.objects.create(name="Mobile")
+class HasEmployeeTestData:
+    def __init__(self):
+        self.architecture = None
+        self.ecommerce = None
+        self.mobile = None
+        self.arnaldo = None
+        self.renato = None
+        self.thiago = None
+        self.employees = []
 
-    self.arnaldo = Employee.objects.create(
-        name="Arnaldo Pereira",
-        email="arnaldo@teste.com",
-        department=self.architecture
-    )
+    def create_test_data(self):
+        self.architecture = Department.objects.create(name="Architecture")
+        self.ecommerce = Department.objects.create(name="E-commerce")
+        self.mobile = Department.objects.create(name="Mobile")
 
-    self.renato = Employee.objects.create(
-        name="Renato Pedigoni",
-        email="renato@teste.com",
-        department=ecommerce
-    )
+        self.arnaldo = Employee.objects.create(
+            name="Arnaldo Pereira",
+            email="arnaldo@teste.com",
+            department=self.architecture
+        )
 
-    self.thiago = Employee.objects.create(
-        name="Thiago Catoto",
-        email="cototo@teste.com",
-        department=mobile
-    )
+        self.renato = Employee.objects.create(
+            name="Renato Pedigoni",
+            email="renato@teste.com",
+            department=self.ecommerce
+        )
 
-    self.token = get_token(self.client)
+        self.thiago = Employee.objects.create(
+            name="Thiago Catoto",
+            email="cototo@teste.com",
+            department=self.mobile
+        )
+
+        self.employees = [self.arnaldo, self.renato, self.thiago]
+
+    class Meta:
+        abstract = True
 
 
-class APIEmployeeListTest(APITestCase):
+class APIEmployeeListTest(APITestCase, HasEmployeeTestData):
     """
     (GET) /api/employees/
     Should return the existing Employees list (without ids)
@@ -43,8 +56,9 @@ class APIEmployeeListTest(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
+        self.token = get_token(self.client)
         self.response = self.client.get('/api/employees/', HTTP_AUTHORIZATION=f'Bearer {self.token}')
 
     def test_get(self):
@@ -52,23 +66,15 @@ class APIEmployeeListTest(APITestCase):
 
     def test_response(self):
         self.maxDiff = None
-        expected = [
-            {
-                "name": "Arnaldo Pereira",
-                "email": "arnaldo@teste.com",
-                "department": "Architecture"
-            },
-            {
-                "name": "Renato Pedigoni",
-                "email": "renato@teste.com",
-                "department": "E-commerce"
-            },
-            {
-                "name": "Thiago Catoto",
-                "email": "cototo@teste.com",
-                "department": "Mobile"
-            }
-        ]
+        expected = []
+        for employee in self.employees:
+            expected.append(
+                {
+                    "name": employee.name,
+                    "email": employee.email,
+                    "department": employee.department.name
+                }
+            )
 
         self.assertJSONEqual(
             str(self.response.content, encoding='utf8'),
@@ -76,7 +82,7 @@ class APIEmployeeListTest(APITestCase):
         )
 
 
-class APIEmployeeRetrieve(APITestCase):
+class APIEmployeeRetrieve(APITestCase, HasEmployeeTestData):
     """
     (GET) /api/employees/<employee_id>
     Should return the Employee with the given id
@@ -85,7 +91,7 @@ class APIEmployeeRetrieve(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
     def test_can_retrieve_an_employee(self):
         self.maxDiff = None
@@ -95,6 +101,7 @@ class APIEmployeeRetrieve(APITestCase):
             "email": self.arnaldo.email,
             "department": self.architecture.id
         }
+        self.token = get_token(self.client)
         self.response = self.client.get(f'/api/employees/{self.arnaldo.id}/',
                                         HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
@@ -136,7 +143,7 @@ class APIEmployeesCreate(APITestCase):
         )
 
 
-class APIEmployeeUpdatePatch(APITestCase):
+class APIEmployeeUpdatePatch(APITestCase, HasEmployeeTestData):
     """
     (PATCH) /api/employees/<employee_id>
     Should update the Employee with the given data (even partial data)
@@ -145,7 +152,7 @@ class APIEmployeeUpdatePatch(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
     def test_can_update(self):
         expected = {
@@ -159,6 +166,7 @@ class APIEmployeeUpdatePatch(APITestCase):
             'name': 'Name Changed'
         }
 
+        self.token = get_token(self.client)
         self.response = self.client.patch(f'/api/employees/{self.arnaldo.id}/', payload, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
         self.assertJSONEqual(
@@ -167,7 +175,7 @@ class APIEmployeeUpdatePatch(APITestCase):
         )
 
 
-class APIEmployeeUpdatePut(APITestCase):
+class APIEmployeeUpdatePut(APITestCase, HasEmployeeTestData):
     """
     (PUT) /api/employees/<employee_id>
     Should update the Employee with the given data (all data)
@@ -176,7 +184,7 @@ class APIEmployeeUpdatePut(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
     def test_can_update(self):
         expected = {
@@ -192,6 +200,7 @@ class APIEmployeeUpdatePut(APITestCase):
             'department': self.architecture.id
         }
 
+        self.token = get_token(self.client)
         self.response = self.client.put(f'/api/employees/{self.arnaldo.id}/', payload, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
         self.assertJSONEqual(
@@ -200,7 +209,7 @@ class APIEmployeeUpdatePut(APITestCase):
         )
 
 
-class APIEmployeeDestroy(APITestCase):
+class APIEmployeeDestroy(APITestCase, HasEmployeeTestData):
     """
     (DEL) /api/employees/<employee_id>
     Should delete the Employee with the given id
@@ -208,15 +217,16 @@ class APIEmployeeDestroy(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
     def test_can_delete(self):
+        self.token = get_token(self.client)
         self.response = self.client.delete('/api/employees/1/', HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(self.response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Employee.objects.count(), 2)
 
 
-class APIEmployeeEmailFilterTest(APITestCase):
+class APIEmployeeEmailFilterTest(APITestCase, HasEmployeeTestData):
     """
     (GET) /api/employees/?email=<email>
     Should return the Employee that has the given email.
@@ -225,8 +235,9 @@ class APIEmployeeEmailFilterTest(APITestCase):
     fixtures = ['user.json']
 
     def setUp(self):
-        create_test_data(self)
+        self.create_test_data()
 
+        self.token = get_token(self.client)
         self.response = self.client.get(f'/api/employees/?email={self.renato.email}', HTTP_AUTHORIZATION=f'Bearer {self.token}')
 
     def test_get(self):
