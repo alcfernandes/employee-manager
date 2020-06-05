@@ -1,5 +1,5 @@
 # Base installation
-Django==2.2.4
+Django==2.2.13
 
 # For use in Settings
 dj-database-url==0.5.0
